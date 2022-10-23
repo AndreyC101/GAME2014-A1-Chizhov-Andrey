@@ -1,12 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class UIManager : MonoBehaviour
 {
     [SerializeField]
-    private GameSystemsManager GameManager;
+    private GameSystemsManager gsm;
+    [SerializeField]
+    private TowerManager tm;
 
+    //Menu Panels
     [SerializeField]
     private GameObject UICanvas;
 
@@ -22,8 +26,19 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private GameObject GameOverMenuPanel;
 
+    [SerializeField]
+    private GameObject StartWaveButton;
+
+    [SerializeField]
+    private TMP_Text PlayButtonText;
+
     //Gameplay
-    
+    [SerializeField]
+    private TMP_Text healthDisplay;
+    [SerializeField]
+    private TMP_Text moneyDisplay_main;
+    [SerializeField]
+    private TMP_Text moneyDisplay_tower;
 
     [SerializeField]
     private GameObject TowerMenu;
@@ -31,23 +46,56 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private GameObject InGameCurrencyIndicator;
 
+    [SerializeField]
+    private TMP_Text[] TowerButtonCostDisplays;
+
     private void Awake()
     {
-        GameManager = FindObjectOfType<GameSystemsManager>();
+        gsm = FindObjectOfType<GameSystemsManager>();
     }
 
-    //Gameplay State Switched
+    private void Start()
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            TowerButtonCostDisplays[i].text = tm.TowerCosts[i].ToString();
+        }
+    }
+
+    //Gameplay State Switches
 
     public void OpenTowerMenu()
     {
         InGameCurrencyIndicator.SetActive(false);
+        StartWaveButton.SetActive(false);
         TowerMenu.SetActive(true);
     }
 
     public void CloseTowerMenu()
     {
         InGameCurrencyIndicator.SetActive(true);
+        StartWaveButton.SetActive(true);
         TowerMenu.SetActive(false);
+    }
+
+    public void UpdateHealthDisplay()
+    {
+        healthDisplay.text = gsm.playerLives.ToString();
+    }
+
+    public void UpdateCurrencyDisplays()
+    {
+        moneyDisplay_main.text = gsm.playerMoney.ToString();
+        moneyDisplay_tower.text = gsm.playerMoney.ToString();
+    }
+
+    public void TowerSelectButtonPressed(TowerType type)
+    {
+        if (gsm.playerMoney >= tm.TowerCosts[(int)type])
+        {
+            CloseTowerMenu();
+            tm.CreateDropTower(type);
+        }
     }
 
     //Menu State Switches
@@ -60,7 +108,8 @@ public class UIManager : MonoBehaviour
         InstructionsMenuPanel.SetActive(false);
         GameOverMenuPanel.SetActive(false);
 
-        GameManager.DisableGameplayObjects();
+        gsm.DisableGameplayObjects();
+        PlayButtonText.text = gsm.gameInProgress ? "Continue" : "Start Game";
     }
 
     public void OpenInstructionsMenu()
@@ -94,5 +143,20 @@ public class UIManager : MonoBehaviour
 
         TowerMenu.SetActive(false);
         InGameCurrencyIndicator.SetActive(true);
+    }
+
+    private void FixedUpdate()
+    {
+        UpdateTowerButtonCostsDisplays();
+    }
+
+    private void UpdateTowerButtonCostsDisplays()
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            if (gsm.playerMoney >= tm.TowerCosts[i])
+                TowerButtonCostDisplays[i].color = Color.white;
+            else TowerButtonCostDisplays[i].color = Color.red;
+        }
     }
 }
