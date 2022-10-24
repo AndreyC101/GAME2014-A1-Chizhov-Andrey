@@ -10,8 +10,7 @@ public class TowerManager : MonoBehaviour
     [SerializeField]
     private GameObject TowerPrefab;
 
-    [SerializeField]
-    private GameObject ProjectilePrefab;
+    public GameObject ProjectilePrefab;
 
     public int[] TowerCosts;
 
@@ -23,11 +22,12 @@ public class TowerManager : MonoBehaviour
     {
         gsm = FindObjectOfType<GameSystemsManager>();
         TowerPrefab = Resources.Load<GameObject>("Prefabs/Tower");
+        ProjectilePrefab = Resources.Load<GameObject>("Prefabs/Projectile");
     }
 
-    public void CreateDropTower(TowerType type)
+    public void CreateDropTower(TowerType type, Vector3 position)
     {
-        var inputPosition = FindObjectOfType<Camera>().ScreenToWorldPoint(Input.GetTouch(0).position);
+        var inputPosition = position;
         inputPosition.z = 0.0f;
         GameObject newTower = Instantiate<GameObject>(TowerPrefab, inputPosition, Quaternion.identity, this.transform);
         newTower.GetComponent<Tower>().InitializeDropTower(type);
@@ -49,5 +49,13 @@ public class TowerManager : MonoBehaviour
             Destroy(tower.gameObject);
         }
         ActiveTowers.Clear();
+    }
+
+    public void OnBloonDestoyed(Bloon bloon)
+    {
+        foreach(Tower tower in ActiveTowers)
+        {
+            tower.RemoveBloon(bloon);
+        }
     }
 }

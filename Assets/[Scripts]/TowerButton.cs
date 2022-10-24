@@ -17,6 +17,8 @@ public class TowerButton : MonoBehaviour, IPointerDownHandler
 
     public void OnPointerDown(PointerEventData data)
     {
-        uim.TowerSelectButtonPressed(towerToSpawn);
+        Vector3 worldPosition = FindObjectOfType<Camera>().ScreenToWorldPoint(data.position);
+        worldPosition.z = 0.0f;
+        uim.TowerSelectButtonPressed(towerToSpawn, worldPosition);
     }
 }

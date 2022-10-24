@@ -11,13 +11,11 @@ public class Bloon : MonoBehaviour
 
 
     private SpriteRenderer sr;
-    private Animation EffectAnimation;
     private EnemyManager em;
 
     private void Awake()
     {
         sr = GetComponent<SpriteRenderer>();
-        EffectAnimation = GetComponentInChildren<Animation>();
     }
 
     public void Initialize(int level, float speed, Vector3 targetPoint, EnemyManager manager)
@@ -28,7 +26,6 @@ public class Bloon : MonoBehaviour
         this.targetPoint = targetPoint;
         em = manager;
         SetSpriteByLevel();
-        Debug.Log($"{EffectAnimation.GetClipCount()} animations registered");
     }
 
     private void SetSpriteByLevel()

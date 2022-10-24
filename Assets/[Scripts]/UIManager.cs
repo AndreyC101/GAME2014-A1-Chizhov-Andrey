@@ -89,12 +89,13 @@ public class UIManager : MonoBehaviour
         moneyDisplay_tower.text = gsm.playerMoney.ToString();
     }
 
-    public void TowerSelectButtonPressed(TowerType type)
+    public void TowerSelectButtonPressed(TowerType type, Vector3 worldPosition)
     {
         if (gsm.playerMoney >= tm.TowerCosts[(int)type])
         {
+            gsm.ChargePlayerMoney(tm.TowerCosts[(int)type]);
             CloseTowerMenu();
-            tm.CreateDropTower(type);
+            tm.CreateDropTower(type, worldPosition);
         }
     }
 

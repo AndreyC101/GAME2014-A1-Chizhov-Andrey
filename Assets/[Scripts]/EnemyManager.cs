@@ -6,6 +6,7 @@ using UnityEngine;
 public class EnemyManager : MonoBehaviour
 {
     private GameSystemsManager gsm;
+    private TowerManager tm;
 
     public GameObject BloonPrefab;
 
@@ -20,6 +21,7 @@ public class EnemyManager : MonoBehaviour
     public void Initialize()
     {
         gsm = FindObjectOfType<GameSystemsManager>();
+        tm = FindObjectOfType<TowerManager>();
         BloonPrefab = Resources.Load<GameObject>("Prefabs/Enemy");
         BloonPath = new Vector3[41];
         for (int i = 0; i < 41; i++)
@@ -32,7 +34,16 @@ public class EnemyManager : MonoBehaviour
     private GameObject CreateBloon(int level)
     {
         GameObject bloon = Instantiate<GameObject>(BloonPrefab, BloonPath[0], Quaternion.identity, GetComponent<Transform>());
-        bloon.GetComponent<Bloon>().Initialize(level, BloonSpeeds[level], BloonPath[1], this);
+        if (bloon.GetComponent<Bloon>())
+        {
+            bloon.GetComponent<Bloon>().Initialize(level, BloonSpeeds[level], BloonPath[1], this);
+        }
+        else
+        {
+            Debug.Log("No bloon component found on bloon");
+            bloon.AddComponent<Bloon>();
+            bloon.GetComponent<Bloon>().Initialize(level, BloonSpeeds[level], BloonPath[1], this);
+        }
         Bloons.Add(bloon);
         return bloon;
     }
@@ -43,6 +54,7 @@ public class EnemyManager : MonoBehaviour
         if (Bloons.Contains(bloon))
         {
             Bloons.Remove(bloon);
+            tm.OnBloonDestoyed(bloon.GetComponent<Bloon>());
             Destroy(bloon);
         }
         if (gotThrough) gsm.OnBloonGotThrough(bloonLevel);
