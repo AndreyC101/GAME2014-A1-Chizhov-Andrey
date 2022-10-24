@@ -69,6 +69,7 @@ public class UIManager : MonoBehaviour
         InGameCurrencyIndicator.SetActive(false);
         StartWaveButton.SetActive(false);
         TowerMenu.SetActive(true);
+        gsm.PlayButtonSoundEffect();
     }
 
     public void CloseTowerMenu()
@@ -76,6 +77,7 @@ public class UIManager : MonoBehaviour
         InGameCurrencyIndicator.SetActive(true);
         StartWaveButton.SetActive(true);
         TowerMenu.SetActive(false);
+        gsm.PlayButtonSoundEffect();
     }
 
     public void UpdateHealthDisplay()
@@ -93,10 +95,22 @@ public class UIManager : MonoBehaviour
     {
         if (gsm.playerMoney >= tm.TowerCosts[(int)type])
         {
-            gsm.ChargePlayerMoney(tm.TowerCosts[(int)type]);
+            gsm.PlayButtonSoundEffect();
             CloseTowerMenu();
             tm.CreateDropTower(type, worldPosition);
         }
+    }
+
+    public void OnWaveStart()
+    {
+        StartWaveButton.SetActive(false);
+        FindObjectOfType<EnemyManager>().WaveStart();
+        gsm.PlayButtonSoundEffect();
+    }
+
+    public void OnWaveEnd()
+    {
+        StartWaveButton.SetActive(true);
     }
 
     //Menu State Switches
@@ -121,6 +135,7 @@ public class UIManager : MonoBehaviour
         MainMenuPanel.SetActive(false);
         InstructionsMenuPanel.SetActive(true);
         GameOverMenuPanel.SetActive(false);
+        gsm.PlayButtonSoundEffect();
     }
 
     public void OpenGameOverMenu()
@@ -144,6 +159,7 @@ public class UIManager : MonoBehaviour
 
         TowerMenu.SetActive(false);
         InGameCurrencyIndicator.SetActive(true);
+        gsm.PlayButtonSoundEffect();
     }
 
     private void FixedUpdate()

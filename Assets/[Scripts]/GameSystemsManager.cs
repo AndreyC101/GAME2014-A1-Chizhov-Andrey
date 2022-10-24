@@ -2,6 +2,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum GameMusic
+{
+    MENU_THEME,
+    GAME_THEME,
+    GAME_OVER_THEME
+}
+
+public enum GameSFX
+{
+    SELECT,
+    PLACE_TOWER,
+    POP
+}
+
 public class GameSystemsManager : MonoBehaviour
 {
     public bool gameInProgress = false;
@@ -12,6 +26,17 @@ public class GameSystemsManager : MonoBehaviour
     EnemyManager enemyManager;
     [SerializeField]
     TowerManager towerManager;
+
+    [SerializeField]
+    private AudioSource GameSoundtrack;
+    [SerializeField]
+    private AudioSource GameAudio;
+
+    [SerializeField]
+    private AudioClip[] gameMusic;
+
+    [SerializeField]
+    private AudioClip[] gameSFX;
 
     [SerializeField]
     private GameObject GameplayObjects;
@@ -26,12 +51,11 @@ public class GameSystemsManager : MonoBehaviour
     private void Awake()
     {
         uiManager = FindObjectOfType<UIManager>();
-        //enemyManager = FindObjectOfType<EnemyManager>();
-        //towerManager = FindObjectOfType<TowerManager>();
     }
     void Start()
     {
         uiManager.OpenMainMenu();
+        PlayMenuTheme();
     }
 
     public void GameStart()
@@ -41,12 +65,19 @@ public class GameSystemsManager : MonoBehaviour
         {
             uiManager.OpenGameUI();
             EnableGameplayObjects();
+            enemyManager.Initialize();
+            GameSoundtrack.Stop();
+            GameSoundtrack.clip = gameMusic[(int)GameMusic.GAME_THEME];
+            GameSoundtrack.loop = true;
+            GameSoundtrack.volume = 0.285f;
+            GameSoundtrack.Play();
+            gameInProgress = true;
             playerLives = 150;
             uiManager.UpdateHealthDisplay();
-            playerMoney = 10000;
+            playerMoney = 250;
             uiManager.UpdateCurrencyDisplays();
-            enemyManager.Initialize();
-            gameInProgress = true;
+            towerManager.DestroyAllTowers();
+            enemyManager.DestroyAllBloons();
         }
     }
 
@@ -83,11 +114,12 @@ public class GameSystemsManager : MonoBehaviour
     {
         playerLives-=(bloonLevel+1);
         uiManager.UpdateHealthDisplay();
-        if (playerLives == 0)
+        if (playerLives <= 0)
         {
             enemyManager.DestroyAllBloons();
             gameInProgress = false;
             DisableGameplayObjects();
+            PlayGameOverTheme();
             uiManager.OpenGameOverMenu();
         }
     }
@@ -96,6 +128,13 @@ public class GameSystemsManager : MonoBehaviour
     {
         playerMoney++;
         uiManager.UpdateCurrencyDisplays();
+        GameAudio.PlayOneShot(gameSFX[Random.Range(2, 6)]);
+    }
+
+    public void OnTowerPlaced(int type)
+    {
+        ChargePlayerMoney(towerManager.TowerCosts[type]);
+        GameAudio.PlayOneShot(gameSFX[(int)GameSFX.PLACE_TOWER]);
     }
 
     //Money Related Functions
@@ -109,5 +148,29 @@ public class GameSystemsManager : MonoBehaviour
     {
         playerMoney += reward;
         uiManager.UpdateCurrencyDisplays();
+    }
+
+    //Audio functions
+    public void PlayMenuTheme()
+    {
+        GameSoundtrack.Stop();
+        GameSoundtrack.clip = gameMusic[(int)GameMusic.MENU_THEME];
+        GameSoundtrack.loop = true;
+        GameSoundtrack.volume = 0.35f;
+        GameSoundtrack.Play();
+    }
+
+    public void PlayGameOverTheme()
+    {
+        GameSoundtrack.Stop();
+        GameSoundtrack.clip = gameMusic[(int)GameMusic.GAME_OVER_THEME];
+        GameSoundtrack.loop = true;
+        GameSoundtrack.volume = 0.35f;
+        GameSoundtrack.Play();
+    }
+
+    public void PlayButtonSoundEffect()
+    {
+        GameAudio.PlayOneShot(gameSFX[(int)GameSFX.SELECT]);
     }
 }   

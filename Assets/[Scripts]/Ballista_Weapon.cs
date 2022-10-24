@@ -30,8 +30,8 @@ public class Ballista_Weapon : MonoBehaviour
         AnimatedWeapon = GetComponentInChildren<Animator>();
         effectRadius = gameObject.AddComponent<CircleCollider2D>();
         timeSinceLastShot = 0.0f;
-        fireDelay = 0.65f;
-        fireRadius = 3.8f;
+        fireDelay = 0.7f;
+        fireRadius = 2.8f;
         effectRadius.radius = fireRadius;
         effectRadius.isTrigger = true;
 
@@ -44,9 +44,10 @@ public class Ballista_Weapon : MonoBehaviour
         boostedFireRadius = fireRadius * 1.3f;
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
-        if (targets.Count > 0)
+        DumpNullTargets();
+        if (targets.Count > 0 && targets[0] != null)
         {
             projectileDirection = Vector3.Normalize(targets[0].transform.position - transform.position);
             rotationAngle = Vector3.SignedAngle(new Vector3(0.0f, 1.0f, 0.0f), projectileDirection, new Vector3(0.0f, 0.0f, 1.0f));
@@ -57,7 +58,7 @@ public class Ballista_Weapon : MonoBehaviour
                 Shoot();
             }
         }
-        timeSinceLastShot += Time.deltaTime;
+        timeSinceLastShot += Time.fixedDeltaTime;
         effectRadius.radius = isBoosted ? boostedFireRadius : fireRadius;
     }
 
@@ -65,7 +66,6 @@ public class Ballista_Weapon : MonoBehaviour
     {
         AnimatedWeapon.SetTrigger("Attack");
         timeSinceLastShot = 0.0f;
-        Debug.Log("Fire");
         GameObject projectile = Instantiate<GameObject>(tm.ProjectilePrefab, transform.position, Quaternion.Euler(new Vector3(0.0f, 0.0f, rotationAngle)), this.transform);
         projectile.GetComponent<Projectile>().Initialize(projectileDirection, 16.0f, isBoosted ? boostedFireRadius : fireRadius);
     }
@@ -97,5 +97,16 @@ public class Ballista_Weapon : MonoBehaviour
     public void Boost()
     {
         isBoosted = true;
+    }
+
+    private void DumpNullTargets()
+    {
+        for (int i = 0; i < targets.Count; i++)
+        {
+            if (targets[i] == null)
+            {
+                targets.Remove(targets[i]);
+            }
+        }
     }
 }

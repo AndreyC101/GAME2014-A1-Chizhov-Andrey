@@ -18,6 +18,12 @@ public class EnemyManager : MonoBehaviour
 
     public List<GameObject> Bloons = new List<GameObject>();
 
+    public int currentWave;
+    private int[] bloonsInWave = new int[5];
+    private float bloonSpawnDelay;
+    private float timeSinceLastBloonSpawn;
+    private bool waveInProgress;
+
     public void Initialize()
     {
         gsm = FindObjectOfType<GameSystemsManager>();
@@ -29,6 +35,11 @@ public class EnemyManager : MonoBehaviour
             BloonPath[i] = GameObject.Find($"Path_Point_{i}").transform.position;
         }
         DestroyAllBloons();
+        for (int i = 0; i < 5; i++)
+        {
+            bloonsInWave[i] = 0;
+        }
+        currentWave = 0;
     }
 
     private GameObject CreateBloon(int level)
@@ -72,30 +83,47 @@ public class EnemyManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Alpha1))
+        timeSinceLastBloonSpawn += Time.deltaTime;
+        if (waveInProgress && timeSinceLastBloonSpawn > bloonSpawnDelay)
         {
-            CreateBloon(0);
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            CreateBloon(1);
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
-            CreateBloon(2);
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha4))
-        {
-            CreateBloon(3);
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha5))
-        {
-            CreateBloon(4);
+            timeSinceLastBloonSpawn = 0.0f;
+            for (int i = 0; i < 5; i++)
+            {
+                if (bloonsInWave[i] > 0)
+                {
+                    CreateBloon(i);
+                    bloonsInWave[i] -= 1;
+                    return;
+                }
+            }
+            WaveEnd();
         }
     }
 
-    public void WaveStart(int waveIndex)
+    public void WaveStart()
     {
+        currentWave++;
+        timeSinceLastBloonSpawn = 0.0f;
+        InitializeWave();
+        waveInProgress = true;
+    }
 
+    private void InitializeWave()
+    {
+        bloonsInWave[0] = (currentWave > 50 ? Mathf.Max(60 - (int)(currentWave * 0.2f), 0) : (int)(-0.012f * Mathf.Pow((currentWave - 50), 2) + 60));
+        bloonsInWave[1] = currentWave > 40 ? Mathf.Max(70 - (int)(currentWave * 0.2f), 0) : (int)(-0.049f * Mathf.Pow((currentWave - 40), 2) + 70);
+        bloonsInWave[2] = currentWave > 50 ? Mathf.Max(80 - (int)(currentWave * 0.2f), 0) : (int)(-0.04f * Mathf.Pow((currentWave - 50), 2) + 80);
+        bloonsInWave[3] = currentWave > 80 ? Mathf.Max(90 - (int)(currentWave * 0.2f), 0) : (int)(-0.017f * Mathf.Pow((currentWave - 80), 2) + 90);
+        bloonsInWave[4] = currentWave > 100 ? 100 + (int)(currentWave * 1.2f) : (int)(-0.015f * Mathf.Pow((currentWave - 100), 2) + 100);
+
+        bloonSpawnDelay = 0.65f - (currentWave * 0.04f);
+        if (bloonSpawnDelay < 0.15f) bloonSpawnDelay = 0.15f;
+    }
+
+    public void WaveEnd()
+    {
+        waveInProgress = false;
+        if (gsm.gameInProgress) gsm.RewardPlayerMoney(100 + currentWave);
+        FindObjectOfType<UIManager>().OnWaveEnd();
     }
 }

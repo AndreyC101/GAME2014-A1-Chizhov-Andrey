@@ -35,7 +35,7 @@ public class Crystal_Weapon_Ice : MonoBehaviour
         boostedFireRadius = fireRadius * 1.3f;
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         if (targets.Count > 0)
         {

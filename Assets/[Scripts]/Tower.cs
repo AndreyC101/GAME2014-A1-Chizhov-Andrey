@@ -25,6 +25,8 @@ public class Tower : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragH
     private BoxCollider2D PlacementCollider;
     private List<GameObject> PlacementContacts = new List<GameObject>();
 
+    private float dropLifeSpan = 10f;
+
     public void InitializeDropTower(TowerType type)
     {
         this.type = type;
@@ -39,6 +41,8 @@ public class Tower : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragH
     {
         WeaponBaseSR.color = Color.white;
         InitializeWeapon();
+        FindObjectOfType<GameSystemsManager>().OnTowerPlaced((int)type);
+        FindObjectOfType<TowerManager>().ActivateTower(this);
         active = true;
     }
 
@@ -109,6 +113,7 @@ public class Tower : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragH
                 WeaponBaseSR.color = Color.green;
             }
             else WeaponBaseSR.color = Color.red;
+            dropLifeSpan = 7.5f;
         }
     }
 
@@ -170,6 +175,18 @@ public class Tower : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragH
 
             default:
                 break;
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        if (!active)
+        {
+            dropLifeSpan -= Time.fixedDeltaTime;
+            if (dropLifeSpan < 0)
+            {
+                Destroy(this.gameObject);
+            }
         }
     }
 }

@@ -30,7 +30,7 @@ public class Spreadshot_Weapon : MonoBehaviour
         AnimatedWeapon = GetComponentInChildren<Animator>();
         effectRadius = gameObject.AddComponent<CircleCollider2D>();
         timeSinceLastShot = 0.0f;
-        fireDelay = 1.15f;
+        fireDelay = 1.2f;
         fireRadius = 1.85f;
         effectRadius.radius = fireRadius;
         effectRadius.isTrigger = true;
@@ -44,9 +44,10 @@ public class Spreadshot_Weapon : MonoBehaviour
         tm = FindObjectOfType<TowerManager>();
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
-        if (targets.Count > 0)
+        DumpNullTargets();
+        if (targets.Count > 0 && targets[0] != null)
         {
             projectileDirection = Vector3.Normalize(targets[0].transform.position - transform.position);
             float rotationAngle = Vector3.SignedAngle(new Vector3(0.0f, 1.0f, 0.0f), projectileDirection, new Vector3(0.0f, 0.0f, 1.0f));
@@ -57,7 +58,7 @@ public class Spreadshot_Weapon : MonoBehaviour
                 Shoot();
             }
         }
-        timeSinceLastShot += Time.deltaTime;
+        timeSinceLastShot += Time.fixedDeltaTime;
         effectRadius.radius = isBoosted ? boostedFireRadius : fireRadius;
     }
 
@@ -65,7 +66,6 @@ public class Spreadshot_Weapon : MonoBehaviour
     {
         AnimatedWeapon.SetTrigger("Attack");
         timeSinceLastShot = 0.0f;
-        Debug.Log("Fire");
         for (int i = -20; i < 41; i += 10)
         {
             GameObject projectile = Instantiate<GameObject>(tm.ProjectilePrefab, transform.position, Quaternion.Euler(new Vector3(0.0f, 0.0f, rotationAngle + i)), this.transform);
@@ -101,5 +101,16 @@ public class Spreadshot_Weapon : MonoBehaviour
     public void Boost()
     {
         isBoosted = true;
+    }
+
+    private void DumpNullTargets()
+    {
+        for (int i = 0; i < targets.Count; i++)
+        {
+            if (targets[i] == null)
+            {
+                targets.Remove(targets[i]);
+            }
+        }
     }
 }
