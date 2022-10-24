@@ -21,6 +21,10 @@ public class Ballista_Weapon : MonoBehaviour
     private float rotationAngle;
     private Vector3 projectileDirection;
 
+    private bool isBoosted = false;
+    private float boostedFireDelay;
+    private float boostedFireRadius;
+
     public void Initialize()
     {
         AnimatedWeapon = GetComponentInChildren<Animator>();
@@ -35,6 +39,9 @@ public class Ballista_Weapon : MonoBehaviour
         AnimatedWeapon.runtimeAnimatorController = (RuntimeAnimatorController)Resources.Load("Sprites/Animations/Ballista_Animator");
 
         tm = FindObjectOfType<TowerManager>();
+
+        boostedFireDelay = fireDelay * 0.7f;
+        boostedFireRadius = fireRadius * 1.3f;
     }
 
     private void Update()
@@ -44,13 +51,14 @@ public class Ballista_Weapon : MonoBehaviour
             projectileDirection = Vector3.Normalize(targets[0].transform.position - transform.position);
             rotationAngle = Vector3.SignedAngle(new Vector3(0.0f, 1.0f, 0.0f), projectileDirection, new Vector3(0.0f, 0.0f, 1.0f));
             transform.rotation = Quaternion.Euler(new Vector3(0.0f, 0.0f, rotationAngle));
-            if (timeSinceLastShot > fireDelay)
+            if (timeSinceLastShot > (isBoosted ? boostedFireDelay : fireDelay))
             {
                 AnimatedWeapon.ResetTrigger("Attack");
                 Shoot();
             }
         }
         timeSinceLastShot += Time.deltaTime;
+        effectRadius.radius = isBoosted ? boostedFireRadius : fireRadius;
     }
 
     private void Shoot()
@@ -59,7 +67,7 @@ public class Ballista_Weapon : MonoBehaviour
         timeSinceLastShot = 0.0f;
         Debug.Log("Fire");
         GameObject projectile = Instantiate<GameObject>(tm.ProjectilePrefab, transform.position, Quaternion.Euler(new Vector3(0.0f, 0.0f, rotationAngle)), this.transform);
-        projectile.GetComponent<Projectile>().Initialize(projectileDirection, 16.0f, fireRadius);
+        projectile.GetComponent<Projectile>().Initialize(projectileDirection, 16.0f, isBoosted ? boostedFireRadius : fireRadius);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -88,7 +96,6 @@ public class Ballista_Weapon : MonoBehaviour
 
     public void Boost()
     {
-        fireDelay = fireDelay * 0.7f;
-        fireRadius = fireRadius * 1.3f;
+        isBoosted = true;
     }
 }

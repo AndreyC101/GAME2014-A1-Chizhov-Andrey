@@ -6,12 +6,15 @@ public class Bloon : MonoBehaviour
 {
     public int level;
     private float speed;
+    private float slowedSpeed;
     private int currentPointIndex;
     public Vector3 targetPoint;
 
 
     private SpriteRenderer sr;
     private EnemyManager em;
+
+    private bool isSlowed;
 
     private void Awake()
     {
@@ -22,6 +25,7 @@ public class Bloon : MonoBehaviour
     {
         this.level = level;
         this.speed = speed;
+        slowedSpeed = this.speed * 0.65f;
         currentPointIndex = 0;
         this.targetPoint = targetPoint;
         em = manager;
@@ -42,7 +46,7 @@ public class Bloon : MonoBehaviour
     private void Move()
     {
         Vector3 direction = targetPoint - transform.position;
-        transform.position += Vector3.Normalize(direction) * speed * Time.fixedDeltaTime;
+        transform.position += Vector3.Normalize(direction) * (isSlowed ? slowedSpeed : speed) * Time.fixedDeltaTime;
 
         float distanceFromTarget = direction.magnitude;
         if (distanceFromTarget < 0.2f)
@@ -70,5 +74,15 @@ public class Bloon : MonoBehaviour
         {
             SetSpriteByLevel();
         }
+    }
+
+    public void ApplySlow()
+    {
+        isSlowed = true;
+    }
+
+    public void SlowExpired()
+    {
+        isSlowed = false;
     }
 }

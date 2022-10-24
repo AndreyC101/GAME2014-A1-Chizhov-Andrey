@@ -59,15 +59,18 @@ public class Tower : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragH
                 break;
 
             case TowerType.ICE:
-                WeaponTransform.position = transform.position + new Vector3(0.0f, 0.9f, 0.0f);
+                WeaponTransform.gameObject.AddComponent<Crystal_Weapon_Ice>();
+                WeaponTransform.gameObject.GetComponent<Crystal_Weapon_Ice>().Initialize();
                 break;
 
             case TowerType.LIGHTNING:
-                WeaponTransform.position = transform.position + new Vector3(0.0f, 1.1f, 0.0f);
+                WeaponTransform.gameObject.AddComponent<Crystal_Weapon_Lightning>();
+                WeaponTransform.gameObject.GetComponent<Crystal_Weapon_Lightning>().Initialize();
                 break;
 
             case TowerType.BOOST:
-                WeaponTransform.position = transform.position + new Vector3(0.0f, 1.2f, 0.0f);
+                WeaponTransform.gameObject.AddComponent<Crystal_Weapon_Boost>();
+                WeaponTransform.gameObject.GetComponent<Crystal_Weapon_Boost>().Initialize();
                 break;
         }
     }
@@ -133,11 +136,36 @@ public class Tower : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragH
                 break;
 
             case TowerType.ICE:
-                WeaponTransform.position = transform.position + new Vector3(0.0f, 0.9f, 0.0f);
+                WeaponTransform.gameObject.GetComponent<Crystal_Weapon_Ice>().RemoveBloonTarget(bloon);
                 break;
 
             case TowerType.LIGHTNING:
-                WeaponTransform.position = transform.position + new Vector3(0.0f, 1.1f, 0.0f);
+                WeaponTransform.gameObject.GetComponent<Crystal_Weapon_Lightning>().RemoveBloonTarget(bloon);
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    public void Boost()
+    {
+        switch (type)
+        {
+            case TowerType.BALLISTA:
+                WeaponTransform.gameObject.GetComponent<Ballista_Weapon>().Boost();
+                break;
+
+            case TowerType.SPREADSHOT:
+                WeaponTransform.gameObject.GetComponent<Spreadshot_Weapon>().Boost();
+                break;
+
+            case TowerType.ICE:
+                WeaponTransform.gameObject.GetComponent<Crystal_Weapon_Ice>().Boost();
+                break;
+
+            case TowerType.LIGHTNING:
+                WeaponTransform.gameObject.GetComponent<Crystal_Weapon_Lightning>().Boost();
                 break;
 
             default:

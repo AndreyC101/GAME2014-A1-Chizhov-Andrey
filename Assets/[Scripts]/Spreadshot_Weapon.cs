@@ -21,6 +21,10 @@ public class Spreadshot_Weapon : MonoBehaviour
     private float rotationAngle;
     private Vector3 projectileDirection;
 
+    private bool isBoosted = false;
+    private float boostedFireDelay;
+    private float boostedFireRadius;
+
     public void Initialize()
     {
         AnimatedWeapon = GetComponentInChildren<Animator>();
@@ -30,6 +34,9 @@ public class Spreadshot_Weapon : MonoBehaviour
         fireRadius = 1.85f;
         effectRadius.radius = fireRadius;
         effectRadius.isTrigger = true;
+
+        boostedFireDelay = fireDelay * 0.7f;
+        boostedFireRadius = fireRadius * 1.3f;
 
         targets = new List<Bloon>();
         AnimatedWeapon.runtimeAnimatorController = (RuntimeAnimatorController)Resources.Load("Sprites/Animations/Spreadshot_Animator");
@@ -44,14 +51,14 @@ public class Spreadshot_Weapon : MonoBehaviour
             projectileDirection = Vector3.Normalize(targets[0].transform.position - transform.position);
             float rotationAngle = Vector3.SignedAngle(new Vector3(0.0f, 1.0f, 0.0f), projectileDirection, new Vector3(0.0f, 0.0f, 1.0f));
             transform.rotation = Quaternion.Euler(new Vector3(0.0f, 0.0f, rotationAngle));
-            if (timeSinceLastShot > fireDelay)
+            if (timeSinceLastShot > (isBoosted ? boostedFireDelay : fireDelay))
             {
                 AnimatedWeapon.ResetTrigger("Attack");
                 Shoot();
             }
         }
         timeSinceLastShot += Time.deltaTime;
-        
+        effectRadius.radius = isBoosted ? boostedFireRadius : fireRadius;
     }
 
     private void Shoot()
@@ -63,7 +70,7 @@ public class Spreadshot_Weapon : MonoBehaviour
         {
             GameObject projectile = Instantiate<GameObject>(tm.ProjectilePrefab, transform.position, Quaternion.Euler(new Vector3(0.0f, 0.0f, rotationAngle + i)), this.transform);
             Vector3 currentProjectileDirection = Quaternion.Euler(0.0f, 0.0f, rotationAngle + i) * projectileDirection;
-            projectile.GetComponent<Projectile>().Initialize(currentProjectileDirection, 12.0f, fireRadius);
+            projectile.GetComponent<Projectile>().Initialize(currentProjectileDirection, 12.0f, isBoosted ? boostedFireRadius : fireRadius);
         }
     }
 
@@ -93,7 +100,6 @@ public class Spreadshot_Weapon : MonoBehaviour
 
     public void Boost()
     {
-        fireDelay = fireDelay * 0.7f;
-        fireRadius = fireRadius * 1.3f;
+        isBoosted = true;
     }
 }

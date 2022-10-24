@@ -43,7 +43,7 @@ public class GameSystemsManager : MonoBehaviour
             EnableGameplayObjects();
             playerLives = 150;
             uiManager.UpdateHealthDisplay();
-            playerMoney = 300;
+            playerMoney = 10000;
             uiManager.UpdateCurrencyDisplays();
             enemyManager.Initialize();
             gameInProgress = true;
@@ -102,6 +102,12 @@ public class GameSystemsManager : MonoBehaviour
     public void ChargePlayerMoney(int price)
     {
         playerMoney -= price;
+        uiManager.UpdateCurrencyDisplays();
+    }
+
+    public void RewardPlayerMoney(int reward)
+    {
+        playerMoney += reward;
         uiManager.UpdateCurrencyDisplays();
     }
 }   
